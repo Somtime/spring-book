@@ -146,3 +146,107 @@ public class Singleton {
 테스트
 </strong>
 </summary>
+
+<br>
+
+<b>작은 단위의 테스트 (Unit Test)</b>
+
+<p>한꺼번에 많은 과정을 테스트 하게되면 수행 과정도 복잡해지고, 오류의 원인도 찾기 힘들어진다. 따라서 테스트는 가능하면 작은 단위로 쪼개서 집중해서 할 수 있어야 한다.</p>
+
+<p>일반적으로 단위는 작을수록 좋다. 단위를 넘어서는 다른 코드들은 신경 쓰지 않고 테스트가 동작할 수 있는게 좋다.</p>
+
+<p>단위 테스트를 거치고 웹에서부터 테스트를 하는 경우 보다 쉽게 오류를 찾을 수 있게 된다.</p>
+
+<br>
+
+<b>UserDaoTest 의 문제점과 자동화<b>
+
+- 수동 확인 작업의 번거로움 : 실행 결과를 직접 보고 확인해야함
+- 실행 작업의 번거로움 : DaoTest 가 많아질수록 모든 main 메소드를 실행해봐야함
+
+```
+// 수정 전
+System.out.println(user2.getName());
+System.out.println(user2.getPassword());
+System.out.println(user2.getId() + " 조회 성공");
+```
+
+```
+// 수정 후
+if (!user.getName().equals(user2.getName())) {
+  System.out.println("테스트 실패 (Name)");
+} else if (!user.getPassword().equals(user2.getPassword())) {
+  System.out.println("테스트 실패 (Password)");
+} else {
+  System.out.println("조회 테스트 성공");
+}
+```
+
+- 이처럼 수정 결과를 확인하고 출력해주는 코드로 변경하게 되면 테스트의 실패나 성공의 판단이 쉬워진다.
+- 포괄적인 테스트로 구현하고, 테스트 수행과 기대하는 결과에 대한 자동화된 테스트 코드를 만들어 둔다면 오류 유무를 빠르고 간단하게 확인 할 수 있다.
+
+<br>
+
+<b>JUnit 테스트로 전환</b>
+
+- @Test Annotation 추가
+- public Method 로 전환
+
+```
+// Before
+public static void main(String[] args) throws ClassNotFoundException, SQLException
+
+if (!user.getName().equals(user2.getName())) { ... }
+```
+
+```
+// After
+@Test
+public void addAndGet() throws SQLException, ClassNotFoundException
+
+assertThat(user2.getName(), is(user.getName()));
+...
+```
+
+</p>
+assertThat(a, b) 메소드는 a의 값을 b(매처) 의 조건과 비교해서 일치하면 다음으로 넘어가고, 아니면 테스트가 실패하도록 만들어준다.
+</p>
+
+<br>
+
+<b>테스트 결과의 일관성</b>
+: 테스트 시 중복 데이터 제거
+
+<p>deleteAll(), getCount() 메소드 추가</p>
+
+```
+public void deleteAll() throws SQLException {
+  Connection c = dataSource.getConnection();
+
+PreparedStatement ps = c.prepareStatement("DELETE FROM users");
+
+ps.executeUpdate();
+
+ps.close();
+c.close();
+}
+
+public int getCount() throws SQLException {
+Connection c = dataSource.getConnection();
+
+PreparedStatement ps = c.prepareStatement("SELECT COUNT(\*) FROM users");
+
+ResultSet rs = ps.executeQuery();
+rs.next();
+int count = rs.getInt(1);
+
+rs.close();
+ps.close();
+c.close();
+
+return count;
+}
+
+```
+
+<br>

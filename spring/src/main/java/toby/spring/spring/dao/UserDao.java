@@ -1,12 +1,15 @@
 package toby.spring.spring.dao;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.dao.EmptyResultDataAccessException;
 import toby.spring.spring.model.User;
 
 import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {
+
     private DataSource dataSource;
 
     public void setDataSource(DataSource dataSource) {
@@ -24,6 +27,8 @@ public class UserDao {
         ps.setString(3, user.getPassword());
 
         ps.executeUpdate();
+
+        ps.close();
         c.close();
     }
 
@@ -36,16 +41,48 @@ public class UserDao {
         ps.setString(1, id);
 
         ResultSet rs = ps.executeQuery();
-        rs.next();
-        User user = new User();
-        user.setId(rs.getString("id"));
-        user.setName(rs.getString("name"));
-        user.setPassword(rs.getString("password"));
+
+        User user = null;
+        if (rs.next()) {
+            user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+        }
 
         rs.close();
         ps.close();
         c.close();
 
+        if (user == null) throw new EmptyResultDataAccessException(1);
+
         return user;
+    }
+
+    public void deleteAll() throws SQLException {
+        Connection c = dataSource.getConnection();
+
+        PreparedStatement ps = c.prepareStatement("DELETE FROM users");
+
+        ps.executeUpdate();
+
+        ps.close();
+        c.close();
+    }
+
+    public int getCount() throws SQLException {
+        Connection c = dataSource.getConnection();
+
+        PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM users");
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
+
+        rs.close();
+        ps.close();
+        c.close();
+
+        return count;
     }
 }
