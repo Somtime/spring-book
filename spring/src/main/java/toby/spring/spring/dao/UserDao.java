@@ -2,10 +2,13 @@ package toby.spring.spring.dao;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import toby.spring.spring.model.User;
 
 import javax.sql.DataSource;
+import java.beans.BeanProperty;
 import java.sql.*;
 
 public class UserDao {
@@ -59,6 +62,7 @@ public class UserDao {
         return user;
     }
 
+    @Bean
     public void deleteAll() throws SQLException {
         Connection c = dataSource.getConnection();
 

@@ -1,5 +1,6 @@
 package toby.spring.spring.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -13,7 +14,7 @@ public class DaoFactory {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("jdbc:mysql://172.21.122.55/toby_spring");
+        dataSource.setUrl("jdbc:mysql://172.19.143.49/toby_spring");
         dataSource.setUsername("root");
         dataSource.setPassword("password");
 

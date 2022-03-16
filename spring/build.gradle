@@ -16,17 +16,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.hamcrest:hamcrest:2.2'
 	implementation 'org.hamcrest:hamcrest-core:2.2'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+	implementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	implementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'mysql:mysql-connector-java'
-	implementation group: 'org.springframework', name: 'spring-asm', version: '3.0.7.RELEASE'
-	implementation group: 'org.springframework', name: 'spring-beans', version: '3.0.7.RELEASE'
-	implementation group: 'org.springframework', name: 'spring-context', version: '3.0.7.RELEASE'
-	implementation group: 'org.springframework', name: 'spring-core', version: '3.0.7.RELEASE'
-	implementation group: 'org.springframework', name: 'spring-expression', version: '3.0.7.RELEASE'
-	implementation group: 'org.springframework', name: 'spring-jdbc', version: '3.0.7.RELEASE'
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-	implementation group: 'cglib', name: 'cglib', version: '2.2.2'
-	/*testImplementation group: 'org.junit', name: 'com.springsource.org.junit', version: '4.7.0'*/
+	implementation group: 'org.springframework', name: 'spring-beans', version: '5.3.16'
+	implementation group: 'org.springframework', name: 'spring-context', version: '5.3.16'
+	implementation group: 'org.springframework', name: 'spring-core', version: '5.3.16'
+	implementation group: 'org.springframework', name: 'spring-expression', version: '5.3.16'
+	implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.16'
+	implementation group: 'cglib', name: 'cglib', version: '3.3.0'
 
 
 }
