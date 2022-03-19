@@ -40,14 +40,15 @@ public class UserDaoTest {
 
     @BeforeEach
     public void setUp() {
-        DataSource dataSource = new SingleConnectionDataSource(
+        /*DataSource dataSource = new SingleConnectionDataSource(
                 "jdbc:mysql://172.19.143.49/toby_spring",
                 "root",
                 "password",
                 true
         ); // 오브젝트 직접 생성
 
-        dao.setDataSource(dataSource);
+        dao.setDataSource(dataSource);*/
+        this.dao = this.context.getBean("userDao", UserDao.class);
 
         this.user1 = new User("id1", "name1", "pass1");
         this.user2 = new User("id2", "name2", "pass2");
