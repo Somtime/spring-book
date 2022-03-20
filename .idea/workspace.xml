@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="8b2bed3e-23a9-4463-b452-bcc26d263655" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/spring/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/spring/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/spring/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/spring/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/spring/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/spring/settings.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/ConnectionMaker.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/ConnectionMaker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/CountingConnectionMaker.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/CountingConnectionMaker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/CountingDaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/CountingDaoFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/DConnectionMaker.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/DConnectionMaker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/DaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/DaoFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/UserDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/dao/UserDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/di/constructor/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/toby/spring/spring/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/test/java/diTest/constructor/UserRepositoryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/test/java/diTest/constructor/UserRepositoryTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/test/java/learningtest/JUnitContextTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/test/java/learningtest/JUnitContextTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/test/java/learningtest/JUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/test/java/learningtest/JUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/test/java/learningtest/junit.xml" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/test/java/learningtest/junit.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/test/java/toby/spring/spring/dao/UserDaoTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/test/java/toby/spring/spring/dao/UserDaoTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="26dbkuczyJqQeYxtQ0QCYC9DNWc" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8b2bed3e-23a9-4463-b452-bcc26d263655" name="Changes" comment="" />
+      <created>1647756579265</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1647756579265</updated>
+    </task>
+    <servers />
+  </component>
+</project>

@@ -3,7 +3,7 @@
 ## 1장 오브젝트와 의존관계
 
 <details>
-<summary>
+<summary id="object-dependency">
 <strong>
 오브젝트와 의존관계
 </strong>
@@ -141,7 +141,7 @@ public class Singleton {
 ## 2장 테스트
 
 <details open>
-<summary>
+<summary id="test">
 <strong>
 테스트
 </strong>
@@ -277,3 +277,49 @@ public int getCount() throws SQLException {
 - 동일한 설정파일을 사용하는 테스트는 하나의 애플리케이션 컨텍스트를 공유한다.
 - 기술의 사용 방법을 익히고 이해를 돕기 위해 학습 테스트를 작성하자.
 - 오류가 발견될 경우 그에 대한 버그 테스트를 만들어두면 유용하다.
+
+<h3>DI (Dependency Injection)</h3>
+
+- 생성자를 이용한 의존성 주입
+  ```
+  public interface Animal {
+    void sound();
+  }
+
+  public class Cat implements Animal {
+    @Override
+    public void sound() {
+      System.out.println("meow~!");
+    }
+  }
+
+  public class Dog implements Animal {
+    @Override
+    public void sound() {
+      System.out.println("bark~!");
+    }
+  }
+
+  public class AnimalSound {
+    private Animal animal;
+
+    public AnimalSound(Animal animal) {
+      this.animal = animal;
+    }
+
+    public void sound() {
+      animal.sound();
+    }
+  }
+
+  public class AnimalTest {
+    @Test
+    public void soundTest() {
+      AnimalSound dog = new AnimalSound(new Dog());
+      AnimalSound cat = new AnimalSound(new Cat());
+
+      dog.sound();
+      cat.sound();
+    }
+  }
+  ```
