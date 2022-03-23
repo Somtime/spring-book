@@ -140,7 +140,7 @@ public class Singleton {
 
 ## 2장 테스트
 
-<details open>
+<details>
 <summary id="test">
 <strong>
 테스트
@@ -323,3 +323,54 @@ public int getCount() throws SQLException {
     }
   }
   ```
+
+</details>
+
+## 3장 템플릿
+
+<details open>
+<summary id="template">
+<strong>
+템플릿
+</strong>
+</summary>
+</details>
+
+<br>
+
+<h4>전략 패턴</h4>
+
+
+> 개방 폐쇄 원칙(OCP)을 잘 지키는 구조이면서도 템플릿 메소드 패턴보다 유연하고 확장성이 뛰어난 것이 오브젝트를 둘로 분리하고 클래스 레벨에서는 인터페이스를 통해서만 의존하도록 만드는 전략 패턴
+
+<br>
+
+<b>구조</b>
+
+![strategy_pattern_structure](.\img\stratege_pattern_structure.jpg)
+
+컨텍스트(Context)의 contextMethod() 에서 일정한 구조를 가지고 동작하다가 특정 확장 기능은 Strategy 인터페이스를 통해 외부의 전략 클래스에 위임하게 됨
+
+<br>
+
+<b>인터페이스</b>
+```
+public interface StatementStrategy {
+  PreparedStatement makePreparedStatement(Connection c) throws SQLException;
+}
+```
+
+<br>
+
+<b>전략 클래스</b>
+```
+public class DeleteAllStatement implements StatementStrategy{
+  @Override
+  public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+    return c.prepareStatement("DELETE FROM users");
+  }
+}
+```
+
+<br>
+
