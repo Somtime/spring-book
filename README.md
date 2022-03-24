@@ -347,7 +347,7 @@ public int getCount() throws SQLException {
 
 <b>구조</b>
 
-![strategy_pattern_structure](.\img\stratege_pattern_structure.jpg)
+![strategy_pattern_structure](./img/stratege_pattern_structure.jpg)
 
 컨텍스트(Context)의 contextMethod() 에서 일정한 구조를 가지고 동작하다가 특정 확장 기능은 Strategy 인터페이스를 통해 외부의 전략 클래스에 위임하게 됨
 
