@@ -374,3 +374,172 @@ public class DeleteAllStatement implements StatementStrategy{
 
 <br>
 
+<b>try/catch/finally 분리</b>
+
+> 클라이언트로부터 StatementStrategy 타입의 전략 오브젝트를 제공 받고 JDBC 구조로 만들어진 컨텍스트 내에서 작업을 수행한다. 제공받은 전략 오브젝트는 PreparedStatement 생성이 필요한 시점에 호출해서 사용한다.
+
+```
+public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
+  Connection c = null;
+  PreparedStatement ps = null;
+
+  try {
+    c = dataSource.getConnection();
+    ps = stmt.makePreparedStatement(c);
+    *ps.executeUpdate();
+  } catch (SQLException e) {
+    throw e;
+  } finally {
+    if (c != null) { try { c.close(); } catch (SQLException  e) { throw e; } }
+    if (ps != null) { try { ps.close(); } catch (SQLException e) { throw e; } }
+  }
+}
+```
+
+<br>
+
+<b>deleteAll()</b>
+
+> deleteAll()은 전략 오브젝트를 만들고 컨텍스트를 호출하는 책임을 지고 있다. 사용할 전략 클래스는 DeleteAllStatement 이므로 해당 클래스의 오브젝트를 생성하고, 컨텍스트로 분리한 jdbcContextWithStatementStrategy() 메소드를 호출한다.
+
+```
+public void deleteAll() throws SQLException {
+  StatementStrategy st = new DeleteAllStatement();  // 특정 전략 클래스의 오브젝트 생성
+  jdbcContextWithStatementStrategy(st); // 컨텍스트 호출, 전략 오브젝트 전달
+}
+```
+
+![clientForStrategyPattern](./img/client_in_strategy_pattern.jpg)
+
+<br>
+
+<b>add()</b>
+
+```
+public class AddStatement implements StatementStrategy{
+  User user;
+
+  public AddStatement(User user) {
+    this.user = user;
+  }
+
+  @Override
+  public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+    PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?, ?, ?)");
+
+    ps.setString(1, user.getId());
+    ps.setString(2, user.getName());
+    ps.setString(3, user.getPassword());
+
+    return ps;
+  }
+}
+
+public class UserDao {
+  public void add(User user) throws ClassNotFoundException, SQLException {
+    StatementStrategy strategy = new AddStatement(user);
+    jdbcContextWithStatementStrategy(strategy);
+  }
+}
+```
+
+<br>
+
+<b>중첩 클래스 (Nested Class)</b>
+
+- 스태틱 클래스 (Static Class)
+- 내부 클래스 (Inner Class)
+  - 멤버 내부 클래스 (Member Inner Class) : 오브젝트 레벨에 정의
+  - 로컬 클래스 (Local Class) : 메소드 레벨에 정의
+    > user 를 내부에서 변경할 수 없게 final로 선언을 해주고-그래야 내부 클래스에서 별도 선언 없이 사용 가능- add() 함수 내부의 익명 클래스로 AddStatement 클래스를 작성한다. 로컬 클래스 내부에서 사용되는 user 변수를 final 로 선언했기 때문에, 로컬 클래스에서는 매개변수와 생성자를 통해서 받지 않아도 user에 접근이 가능하다. 또한 로컬 클래스를 선언해줌으로써 이전과 같이 클래스 파일을 하나 더 만들지 않아도 된다.
+
+    > add() 함수 내부에서만 AddStatement 가 필요하다는 가정 하에 이런식으로 사용이 가능하다.
+
+    ```
+    public void add(final User user) throws ClassNotFoundException, SQLException {
+      class AddStatement implements StatementStrategy {
+        @Override
+        public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+          PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?, ?, ?)");
+
+          ps.setString(1, user.getId());
+          ps.setString(2, user.getName());
+          ps.setString(3, user.getPassword());
+
+          return ps;
+        }
+      }
+
+      StatementStrategy strategy = new AddStatement();
+      jdbcContextWithStatementStrategy(strategy);
+    }
+
+    ```
+  - 익명 내부 클래스 (Anonymous Inner Class) : 이름을 갖지 않음 - 선언된 위치에 따라 범위가 다름
+    > 이름을 갖지 않는 클래스로 클래스 선언과 오브젝트 생성이 결합된 형태 new 인터페이스이름() { 클래스 내용 };
+    클래스를 재사용할 필요가 없고, 구현한 인터페이스 타입으로만 사용할 경우에 용이
+    ```
+    public void add(final User user) throws ClassNotFoundException, SQLException {
+      StatementStrategy strategy = new StatementStrategy() {
+        @Override
+        public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+          PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?, ?, ?)");
+
+          ps.setString(1, user.getId());
+          ps.setString(2, user.getName());
+          ps.setString(3, user.getPassword());
+
+          return ps;
+        }
+      };
+      jdbcContextWithStatementStrategy(strategy);
+    }
+    ```
+
+    ```
+    public void add(final User user) throws ClassNotFoundException, SQLException {
+      jdbcContextWithStatementStrategy(new StatementStrategy() {
+        @Override
+        public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+          PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) VALUES(?, ?, ?)");
+
+          ps.setString(1, user.getId());
+          ps.setString(2, user.getName());
+          ps.setString(3, user.getPassword());
+
+          return ps;
+        }
+      });
+    }
+    ```
+
+<br>
+
+<b>Jdbc try/catch/finally 클래스 분리</b>
+
+```
+public class JdbcContext {
+  DataSource dataSource;
+
+  public JdbcContext(DataSource dataSource) {
+      this.dataSource = dataSource;
+  }
+
+  public void workWithStatementStrategy(StatementStrategy stmt) throws SQLException {
+    Connection c = null;
+    PreparedStatement ps = null;
+
+    try {
+      c = dataSource.getConnection();
+      ps = stmt.makePreparedStatement(c);
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw e;
+    } finally {
+      if (c != null) { try { c.close(); } catch (SQLException e) { throw e; } }
+      if (ps != null) { try { ps.close(); } catch  (SQLException e) { throw e; }
+      }
+    }
+  }
+}
+```

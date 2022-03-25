@@ -38,10 +38,13 @@ public class UserDaoTest {
     @Autowired
     UserDao dao;
 
+    @Autowired
+    JdbcContext jdbcContext;
+
     @BeforeEach
     public void setUp() {
         /*DataSource dataSource = new SingleConnectionDataSource(
-                "jdbc:mysql://172.19.143.49/toby_spring",
+                "jdbc:mysql://172.19.233.122/toby_spring",
                 "root",
                 "password",
                 true
