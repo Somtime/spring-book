@@ -83,15 +83,7 @@ public class UserDao {
 
     @Bean
     public void deleteAll() throws SQLException {
-        /*StatementStrategy st = new DeleteAllStatement();*/
-        /*jdbcContextWithStatementStrategy(st);*/
-
-        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                return c.prepareStatement("DELETE FROM users");
-            }
-        });
+        jdbcContext.executeSql("DELETE FROM users");
     }
 
     public int getCount() throws SQLException {

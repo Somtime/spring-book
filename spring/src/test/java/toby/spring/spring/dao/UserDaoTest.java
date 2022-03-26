@@ -38,19 +38,8 @@ public class UserDaoTest {
     @Autowired
     UserDao dao;
 
-    @Autowired
-    JdbcContext jdbcContext;
-
     @BeforeEach
     public void setUp() {
-        /*DataSource dataSource = new SingleConnectionDataSource(
-                "jdbc:mysql://172.19.233.122/toby_spring",
-                "root",
-                "password",
-                true
-        ); // 오브젝트 직접 생성
-
-        dao.setDataSource(dataSource);*/
         this.dao = this.context.getBean("userDao", UserDao.class);
 
         this.user1 = new User("id1", "name1", "pass1");
