@@ -3,22 +3,18 @@ package toby.spring.spring.dao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import toby.spring.spring.model.User;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,28 +22,24 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DaoFactory.class) // Configuration Class 지정 인듯?
-@DirtiesContext // 애플리케이션 컨텍스트의 구성이나 상태 변경 을 직접 한다고 선언!
+/*@DirtiesContext // 애플리케이션 컨텍스트의 구성이나 상태 변경 을 직접 한다고 선언!*/
 public class UserDaoTest {
     private User user1;
     private User user2;
     private User user3;
 
-    @Autowired
     ApplicationContext context;
-
-    @Autowired
     UserDao dao;
+
 
     @BeforeEach
     public void setUp() {
-        this.dao = this.context.getBean("userDao", UserDao.class);
+        this.context = new AnnotationConfigApplicationContext(DaoFactory.class);
+        this.dao = context.getBean("userDao", UserDao.class);
 
         this.user1 = new User("id1", "name1", "pass1");
         this.user2 = new User("id2", "name2", "pass2");
         this.user3 = new User("id3", "name3", "pass3");
-
-        System.out.println(this.context);
-        System.out.println(this);
     }
 
     @Test
@@ -71,8 +63,6 @@ public class UserDaoTest {
     // getCount() 테스트
     @Test
     public void count() throws SQLException, ClassNotFoundException {
-
-
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
@@ -98,5 +88,32 @@ public class UserDaoTest {
 
     }
 
+    @Test
+    public void getAll() throws SQLException, ClassNotFoundException {
+        dao.deleteAll();
 
+        dao.add(user1);
+        List<User> users1 = dao.getAll();
+        assertThat(users1.size(), is(1));
+        checkSameUser(user1, users1.get(0));
+
+        dao.add(user2);
+        List<User> users2 = dao.getAll();
+        assertThat(users2.size(), is(2));
+        checkSameUser(user1, users2.get(0));
+        checkSameUser(user2, users2.get(1));
+
+        dao.add(user3);
+        List<User> users3 = dao.getAll();
+        assertThat(users3.size(), is(3));
+        checkSameUser(user1, users3.get(0));
+        checkSameUser(user2, users3.get(1));
+        checkSameUser(user3, users3.get(2));
+    }
+
+    private void checkSameUser(User user1, User user2) {
+        assertThat(user1.getId(), is(user2.getId()));
+        assertThat(user1.getName(), is(user2.getName()));
+        assertThat(user1.getPassword(), is(user2.getPassword()));
+    }
 }
