@@ -27,6 +27,7 @@ public class UserDaoTest {
     private User user1;
     private User user2;
     private User user3;
+    private User user4;
 
     ApplicationContext context;
     UserDao dao;
@@ -40,6 +41,7 @@ public class UserDaoTest {
         this.user1 = new User("id1", "name1", "pass1");
         this.user2 = new User("id2", "name2", "pass2");
         this.user3 = new User("id3", "name3", "pass3");
+        this.user4 = new User("id1", "name1", "pass1");
     }
 
     @Test
@@ -109,6 +111,14 @@ public class UserDaoTest {
         checkSameUser(user1, users3.get(0));
         checkSameUser(user2, users3.get(1));
         checkSameUser(user3, users3.get(2));
+    }
+
+    @Test
+    public void duplicateUserIdException() {
+        dao.deleteAll();
+
+        dao.add(user1);
+        dao.add(user4);
     }
 
     private void checkSameUser(User user1, User user2) {

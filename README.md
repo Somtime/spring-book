@@ -281,6 +281,7 @@ public int getCount() throws SQLException {
 <h3>DI (Dependency Injection)</h3>
 
 - 생성자를 이용한 의존성 주입
+
   ```
   public interface Animal {
     void sound();
@@ -328,18 +329,16 @@ public int getCount() throws SQLException {
 
 ## 3장 템플릿
 
-<details open>
+<details>
 <summary id="template">
 <strong>
 템플릿
 </strong>
 </summary>
-</details>
 
 <br>
 
 <h4>전략 패턴</h4>
-
 
 > 개방 폐쇄 원칙(OCP)을 잘 지키는 구조이면서도 템플릿 메소드 패턴보다 유연하고 확장성이 뛰어난 것이 오브젝트를 둘로 분리하고 클래스 레벨에서는 인터페이스를 통해서만 의존하도록 만드는 전략 패턴
 
@@ -354,6 +353,7 @@ public int getCount() throws SQLException {
 <br>
 
 <b>인터페이스</b>
+
 ```
 public interface StatementStrategy {
   PreparedStatement makePreparedStatement(Connection c) throws SQLException;
@@ -363,6 +363,7 @@ public interface StatementStrategy {
 <br>
 
 <b>전략 클래스</b>
+
 ```
 public class DeleteAllStatement implements StatementStrategy{
   @Override
@@ -449,8 +450,10 @@ public class UserDao {
 
 - 스태틱 클래스 (Static Class)
 - 내부 클래스 (Inner Class)
+
   - 멤버 내부 클래스 (Member Inner Class) : 오브젝트 레벨에 정의
   - 로컬 클래스 (Local Class) : 메소드 레벨에 정의
+
     > user 를 내부에서 변경할 수 없게 final로 선언을 해주고-그래야 내부 클래스에서 별도 선언 없이 사용 가능- add() 함수 내부의 익명 클래스로 AddStatement 클래스를 작성한다. 로컬 클래스 내부에서 사용되는 user 변수를 final 로 선언했기 때문에, 로컬 클래스에서는 매개변수와 생성자를 통해서 받지 않아도 user에 접근이 가능하다. 또한 로컬 클래스를 선언해줌으로써 이전과 같이 클래스 파일을 하나 더 만들지 않아도 된다.
 
     > add() 함수 내부에서만 AddStatement 가 필요하다는 가정 하에 이런식으로 사용이 가능하다.
@@ -475,9 +478,12 @@ public class UserDao {
     }
 
     ```
+
   - 익명 내부 클래스 (Anonymous Inner Class) : 이름을 갖지 않음 - 선언된 위치에 따라 범위가 다름
+
     > 이름을 갖지 않는 클래스로 클래스 선언과 오브젝트 생성이 결합된 형태 new 인터페이스이름() { 클래스 내용 };
-    클래스를 재사용할 필요가 없고, 구현한 인터페이스 타입으로만 사용할 경우에 용이
+    > 클래스를 재사용할 필요가 없고, 구현한 인터페이스 타입으로만 사용할 경우에 용이
+
     ```
     public void add(final User user) throws ClassNotFoundException, SQLException {
       StatementStrategy strategy = new StatementStrategy() {
@@ -624,3 +630,150 @@ public class UserDao {
 - 컨텍스트가 하나 이상의 클라이언트 오브젝트에서 사용된다면 클래스를 분리해서 공유하도록 만든다.
 - 컨텍스트는 별도의 빈으로 등록해서 DI 받거나 클라이언트 클래스에서 직접 생성해서 사용한다. 클래스 내부에서 컨텍스트를 사용할 때 컨텍스트가 의존하는 외부의 오브젝트가 있다면 코드를 이용해서 직접 DI 해줄 수 있다.
 - 단일 전략 메소드를 갖는 전략 패턴이면서 익명 내부 클래스를 사용해서 매번 전략을 새로 만들어 사용하고, 컨텍스트 호출과 동시에 전략 DI를 수행하는 방식을 템플릿/콜백 패턴이라고 한다.
+</details>
+
+## 4장 예외
+
+<details open>
+<summary id="exception">
+<strong>
+예외
+</strong>
+</summary>
+
+<h4>초난감 예외처리</h4>
+
+<b>예외 블랙홀</b>
+
+- 예외를 무시하는 코드
+  : 예외가 발생했을 때 이처럼 그냥 넘어가버리면 예외가 발생하는 것보다 더 위험하다. 어플리케이션의 어딘가에서 예외가 발생했는데 무시하고 진행하게 되면 이후에 예상치 못한 문제가 발생할 수 있다.
+
+  ```
+  try {
+    ...
+  } catch (SQLException e) {
+
+  }
+  ```
+
+- 예외를 콘솔창에 출력만 해주는 코드
+  : 개발 초기에나 운영을 시작하지 않은 상태에서는 메세지를 확인할 수 있어 유용할수도 있다. 하지만 다른 로그나 메시지가 많아지거나 운영서버에 올라갔을 때는 일일히 확인하고 처리하는 것이 불가능해진다.
+
+  ```
+  try {
+    ...
+  } catch (SQLException e) {
+    System.out.println(e);
+  }
+
+  try {
+    ...
+  } catch (SQLException e) {
+    e.printStackTrace();
+  }
+  ```
+
+- 차라리...
+  : 실제로 이렇게 사용할 수는 없겠지만, 예외를 잡아서 조취를 취할 방법이 없다면 굳이 잡아서 위의 코드들처럼 해주는 것보단 종료시키는게 나을지도..
+
+  ```
+  try {
+    ...
+  } catch (SQLException e) {
+    e.printStackTrace();
+    System.exit(1);
+  }
+  ```
+
+<br>
+
+<b>예외의 종류와 특징</b>
+
+- 체크 예외 (Checked Exception)
+  : RuntimeException 을 상속하지 않은 Exception의 서브클래스로 체크예외가 발생할 수 있는 메소드를 사용할 경우 반드시 예외를 처리하는 코드를 함께 작성해야 한다. (throw, try/catch/finally)
+  예외를 어떤식으로든 복구할 가능성이 있는 경우에 해당한다. 또한 예외를 처리해주지 않을 경우 컴파일 에러가 발생한다.
+
+- 언체크 예외 (Unchecked Exception)
+  : RuntimeException 을 상속한 Exception의 서브클래스로 명시적인 예외처리를 강제하지 않는다. 런타임 예외는 예외 처리를 강제하지 않는다. NullPointerException 이나 IlleagalArgumentException 처럼 개발자의 부주의로 인한 상황에서 발생하는 예외이다.
+
+<br>
+
+<b>예외처리 방법</b>
+
+- 예외 복구
+  : 예외로 인해 기본 작업 흐름이 불가능하다면 다른 작업 흐름으로 자연스럽게 유도한다. 이런 경우 예외상황은 다시 정상으로 돌아오고, 예외를 복구했다고 볼 수 있다.
+
+  ```
+  int maxretry = MAX_RETRY;
+  while (maxretry-- > 0) {
+    try{
+      ...
+      return;
+    } catch (SomeException e) {
+      // 로그 출력, 정해진 시간만큼 대기
+    } finally {
+      // 리소스 반납, 정리 작업
+    }
+  }
+  throw new RetryFailedException(); // 최대 재시도 횟수를 넘기면 예외 발생
+  ```
+
+- 예외 처리 회피
+  : 예외처리를 자신을 호출한 쪽으로 던져버리는 것으로 catch 문으로 예외를 잡은 후 로그를 출력하고 예외를 던지는 것이다.
+  예외를 회피하는 것은 예외를 복구하는 것처럼 의도가 분명해야 한다. 콜백/템플릿처럼 긴밀한 관계에 있는 다른 오브젝트에게 예외처리 책임을 분명히 지게 하거나, 자신을 호출하는 쪽에서 예외를 다루는 게 최선의 방법이라는 분명한 확신이 있을 때 사용해야 한다.
+
+  ```
+  public void add() throws SQLException {
+    ... // JDBC flow ~
+  }
+
+  public void add() throws SQLException {
+    try {
+      ... // JDBC flow ~
+    } catch (SQLException e) {
+      // 로그 출력
+      throw e;
+    }
+  }
+  ```
+
+- 예외 전환
+  : 예외 회피와 같이 예외를 복구해서 정상적인 상태로는 만들 수 없을 때 밖으로 예외를 던지는 것이다. 하지만 발생한 예외를 적절한 예외로 전환해서 던지는 방식이다.
+
+  <b>예외 전환의 목적</b>
+
+  - 내부에서 발생한 예외를 그대로 던지는 것이 그 예외상황에 대한 적절한 의미를 부여해주지 못하는 경우에, 예외 전환을 통하여 의미를 분명하게 해줄 수 있는 예외로 바꿔서 메소드를 호출한 쪽에서 적절하게 해석하고 복구할 수 있게 해줄 수 있다.
+
+  ```
+  public void add(User user) throws DuplicateUserIdException, SQLException {
+    try {
+      // JDBC user table insert
+    } catch (SQLException e) {
+      if (e.getErrorCode() == MysqlErrorNumbers.ER_ENTRY)
+        throw DuplicateUserIdException(); // Mysql 에서 Duplicate Entry 예외상황 일 때 DuplicateUserIdException 같은 구체적인 예외를 만들어서 던져줌
+      else
+        throw e;
+    }
+  }
+  ```
+
+<br>
+
+<b>애플리케이션 예외</b>
+: 시스템 또는 외부의 예외상황이 원인이 아니라 애플리케이션 자체의 로직에 의해 의도적으로 발생시키고, 반드시 catch해서 무언가의 조치를 취하도록 하는 예외
+
+```
+// 은행 출금/ 잔고 확인의 기능을 담은 메소드 구현
+try {
+  BigDecimal balance = account.withdraw(amount);
+  ... // 정상 결과 메시지 출력
+} catch (InsufficientBalanceException e) {
+  // InsufficientBalanceException에 담긴 인출 가능한 잔고금액의 정보를 가져온다.
+  BigDecimal availFunds = e.getAvailFunds();
+  ...
+  // 잔고 부족 결과 메시지 출력
+}
+
+```
+
+</detail>

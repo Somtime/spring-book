@@ -1,19 +1,12 @@
 package toby.spring.spring.dao;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import toby.spring.spring.model.User;
 
 import javax.sql.DataSource;
-import java.beans.BeanProperty;
 import java.sql.*;
 import java.util.List;
 
@@ -24,11 +17,22 @@ public class UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public void add(final User user) throws ClassNotFoundException, SQLException {
-        this.jdbcTemplate.update("INSERT INTO users(id, name, password) VALUES(?, ?, ?)", user.getId(), user.getName(), user.getPassword());
+    public void add(User user) {
+
+
+        try {
+            this.jdbcTemplate.update("INSERT INTO users(id, name, password) VALUES(?, ?, ?)", user.getId(), user.getName(), user.getPassword());
+        } catch (Exception e) {
+            if (e.getClass() == DuplicateKeyException.class) {
+                /*throw new DuplicateUserIdException(e);*/
+                throw new DuplicateUserIdException(e);
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
-    public User get(String id) throws ClassNotFoundException, SQLException {
+    public User get(String id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT * FROM users WHERE id = ?",
                 new Object[]{id},
@@ -44,11 +48,11 @@ public class UserDao {
     }
 
     @Bean
-    public void deleteAll() throws SQLException {
+    public void deleteAll() {
         this.jdbcTemplate.update("DELETE FROM users");
     }
 
-    public int getCount() throws SQLException {
+    public int getCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
     }
 
