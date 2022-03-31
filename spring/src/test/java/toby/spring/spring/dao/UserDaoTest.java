@@ -3,11 +3,14 @@ package toby.spring.spring.dao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import toby.spring.spring.model.User;
@@ -18,10 +21,12 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DaoFactory.class) // Configuration Class 지정 인듯?
+/*@ContextConfiguration("applicationContext.xml") // Configuration Xml*/
 /*@DirtiesContext // 애플리케이션 컨텍스트의 구성이나 상태 변경 을 직접 한다고 선언!*/
 public class UserDaoTest {
     private User user1;
@@ -30,12 +35,14 @@ public class UserDaoTest {
     private User user4;
 
     ApplicationContext context;
-    UserDao dao;
 
+    @Autowired UserDao dao;
+    @Autowired DataSource dataSource;
 
     @BeforeEach
     public void setUp() {
         this.context = new AnnotationConfigApplicationContext(DaoFactory.class);
+        /*this.context = new GenericXmlApplicationContext("applicationContext.xml");*/
         this.dao = context.getBean("userDao", UserDao.class);
 
         this.user1 = new User("id1", "name1", "pass1");
@@ -114,11 +121,28 @@ public class UserDaoTest {
     }
 
     @Test
-    public void duplicateUserIdException() {
+    public void duplicateKey() throws DuplicateKeyException {
         dao.deleteAll();
 
-        dao.add(user1);
-        dao.add(user4);
+        assertThrows(DuplicateKeyException.class, () -> {
+            dao.add(user1);
+            dao.add(user1);
+        });
+    }
+
+    @Test
+    public void sqlExceptionTranslate() {
+        dao.deleteAll();
+
+        try {
+            dao.add(user1);
+            dao.add(user1);
+        } catch (DuplicateKeyException e) {
+            SQLException sqlEx = (SQLException) e.getRootCause();
+            SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+
+            assertThat(set.translate(null, null, sqlEx), instanceOf(DuplicateKeyException.class));
+        }
     }
 
     private void checkSameUser(User user1, User user2) {

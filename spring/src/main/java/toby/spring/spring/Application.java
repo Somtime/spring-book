@@ -1,8 +1,7 @@
 package toby.spring.spring;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import toby.spring.spring.dao.UserDao;
+import toby.spring.spring.dao.UserDaoJdbc;
 import toby.spring.spring.model.User;
 
 import java.sql.SQLException;
@@ -11,7 +10,7 @@ import java.sql.SQLException;
 public class Application {
 
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
-		UserDao dao = new UserDao();
+		UserDaoJdbc dao = new UserDaoJdbc();
 		User user = new User();
 
 		user.setId("geonhee");

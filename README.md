@@ -737,26 +737,6 @@ public class UserDao {
   }
   ```
 
-- 예외 전환
-  : 예외 회피와 같이 예외를 복구해서 정상적인 상태로는 만들 수 없을 때 밖으로 예외를 던지는 것이다. 하지만 발생한 예외를 적절한 예외로 전환해서 던지는 방식이다.
-
-  <b>예외 전환의 목적</b>
-
-  - 내부에서 발생한 예외를 그대로 던지는 것이 그 예외상황에 대한 적절한 의미를 부여해주지 못하는 경우에, 예외 전환을 통하여 의미를 분명하게 해줄 수 있는 예외로 바꿔서 메소드를 호출한 쪽에서 적절하게 해석하고 복구할 수 있게 해줄 수 있다.
-
-  ```
-  public void add(User user) throws DuplicateUserIdException, SQLException {
-    try {
-      // JDBC user table insert
-    } catch (SQLException e) {
-      if (e.getErrorCode() == MysqlErrorNumbers.ER_ENTRY)
-        throw DuplicateUserIdException(); // Mysql 에서 Duplicate Entry 예외상황 일 때 DuplicateUserIdException 같은 구체적인 예외를 만들어서 던져줌
-      else
-        throw e;
-    }
-  }
-  ```
-
 <br>
 
 <b>애플리케이션 예외</b>
@@ -775,5 +755,77 @@ try {
 }
 
 ```
+
+<br>
+
+<h4>예외 전환</h4>
+
+> 예외 회피와 같이 예외를 복구해서 정상적인 상태로는 만들 수 없을 때 밖으로 예외를 던지는 것이다. 하지만 발생한 예외를 적절한 예외로 전환해서 던지는 방식이다.
+
+<br>
+
+<b>예외 전환의 목적</b>
+
+- 런타임 예외로 포장하여 굳이 필요하지 않은 catch/throws 를 없애주는 것
+- 로우레벨의 예외를 좀 더 의미 있고 추상화된 예외로 바꿔서 던져주는 것
+  : 내부에서 발생한 예외를 그대로 던지는 것이 그 예외상황에 대한 적절한 의미를 부여해주지 못하는 경우에, 예외 전환을 통하여 의미를 분명하게 해줄 수 있는 예외로 바꿔서 메소드를 호출한 쪽에서 적절하게 해석하고 복구할 수 있게 해줄 수 있다.
+  ```
+  public void add(User user) throws DuplicateUserIdException, SQLException {
+    try {
+      // JDBC user table insert
+    } catch (SQLException e) {
+      if (e.getErrorCode() == MysqlErrorNumbers.ER_ENTRY)
+        throw DuplicateUserIdException(); // Mysql 에서 Duplicate Entry 예외상황 일 때 DuplicateUserIdException 같은 구체적인 예외를 만들어서 던져줌
+      else
+        throw e;
+    }
+  }
+  ```
+
+<br>
+
+<b>JDBC의 한계</b>
+: JDBC는 자바를 이용해 DB에 접근하는 방법을 추상화된 API 형태로 정희해놓고, 각 DB 업체가 JDBC 표준을 따라 만들어진 드라이버를 제공하게 해준다. 내부 구현을 DB 마다 다를 수 있지만 JDBC의 Connection, Statement, ResultSet 등의 표준 인터페이스를 통해 DB 종류에 상관없이 일관된 방법으로 프로그램을 개발할 수 있다.
+하지만 DB 종류에 상관없이 사용할 수 있는 데이터 액세스 코드를 작성하는 것은 쉽지 않다. 표준화된 JDBC API도 DB를 자유롭게 변경해서 사용할 수 있는 유연한 코드를 보장해주지는 못한다.
+
+- 비표준 SQL
+  : SQL은 어느 정도 표준화된 언어이고 몇 가지 표준 규약이 있긴 하지만, 대부분의 DB는 표준을 따르지 않는 비표준 문법과 기능도 제공한다. 대용량 데이터를 처리하기 위해 최적화 기법을 SQL에 적용하거나, 페이징 처리를 위해 쿼리에 조건을 포함시키거나, 특별한 기능을 제공하는 함수를 SQL에 사용하려면 비표준 SQL 문장이 만들어진다. 이렇게 작성된 비표준 SQL은 결국 DAO 코드에 들어가게 되고, 해당 DAO는 특정 DB에 종속적인 코드가 되어버린다.
+
+- 호환성 없는 SQLException의 DB 에러 정보
+  : SQLException은 수백여 가지의 예외 정보들을 catch 하게 된다. 또한 DB 마다 에러의 종류와 원인이 제각각인데 반해 JDBC는 데이터 처리 중에 발생하는 다양한 예외를 그냥 SQLException 하나에 담아버린다. 또한 DB 에러코드 또한 DB 별로 다르기 때문에 각 DB 별로 에러 코드에 대한 대응을 다르게 취해줘야 한다.
+
+<br>
+
+<h4>기술에 독립적인 UserDao</h4>
+
+- DAO 인터페이스
+  : DAO를 데이터 액세스 로직을 담은 코드의 성격이 다른 코드에서 분리하는 방식을 사용하면 전략 패턴과 같은 방법을 적용해 구현 방법을 변경해서 사용할 수 있다. DAO를 사용하는 쪽에서는 DAO가 내부에서 어떤 데이터 액세스 기술을 사용하는지 신경 쓰지 않을 수 있다.
+
+  ```
+  // UserDao
+  public interface UserDao {
+    void add (User user);
+    User get(String id);
+    List<User> getAll();
+    void deleteAll();
+    int getCount();
+  }
+  ```
+
+  이와 같이 UserDao를 인터페이스로 선언하는 경우 JDBC, JPA, Hibernate 에 따라서 UserDaoJdbc, UserDaoJpa, UserDaoHibernate 라는 클래스로 각 기술에 맞춰 구현할 수 있다.
+
+<br>
+
+<h4>정리</h4>
+
+- 예외를 잡아서 아무런 조취를 취하지 않거나 의미 없는 throws 선언을 습관처럼 사용하는 것은 위험하다.
+- 예외는 복구하거나, 예외 처리 오브젝트로 의도적으로 전달하거나, 적절한 예외로 전환하여 던져줘야 한다.
+- 예외를 전달할 때는 좀 더 의미 있는 예외로 변경하거나, 해결할 수 없는 예외들은 런타임 예외로 포장하는 방법이 있다.
+- JDBC의 SQLException은 대부분 복구할 수 없는 예외이므로 런타임 예외로 포장하는 것이 바람직하다.
+- SQLException의 에러코드는 DB에 종속되기 때문에 각 DB에 맞는 독립적인 예외로 전환할 필요가 있다.
+- 스프링은 DataAccessException을 통해 DB에 독립적으로 적용 가능한 추상화된 런타임 예외 계층을 제공한다.
+- DAO를 데이터 액세스 기술에서 독립시키려면 인터페이스 도입과 런타임 예외 전환, 기술에 독립적인 추상화된 예외로의 전환이 필요하다.
+
+<br>
 
 </detail>
