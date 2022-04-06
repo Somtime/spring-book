@@ -13,6 +13,7 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import toby.spring.spring.model.Level;
 import toby.spring.spring.model.User;
 
 import javax.sql.DataSource;
@@ -44,16 +45,16 @@ public class UserDaoTest {
         this.context = new AnnotationConfigApplicationContext(DaoFactory.class);
         /*this.context = new GenericXmlApplicationContext("applicationContext.xml");*/
         this.dao = context.getBean("userDao", UserDao.class);
+        this.dao.deleteAll();
 
-        this.user1 = new User("id1", "name1", "pass1");
-        this.user2 = new User("id2", "name2", "pass2");
-        this.user3 = new User("id3", "name3", "pass3");
+        this.user1 = new User("id1", "name1", "pass1", Level.BASIC, 1, 0);
+        this.user2 = new User("id2", "name2", "pass2", Level.SILVER, 55, 10);
+        this.user3 = new User("id3", "name3", "pass3", Level.GOLD, 100, 40);
         this.user4 = new User("id1", "name1", "pass1");
     }
 
     @Test
     public void addAndGet() throws SQLException, ClassNotFoundException {
-        dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
         dao.add(user1);
@@ -61,18 +62,15 @@ public class UserDaoTest {
         assertThat(dao.getCount(), is(2));
 
         User userGet1 = dao.get(user1.getId());
-        assertThat(userGet1.getName(), is(user1.getName()));
-        assertThat(userGet1.getPassword(), is(user1.getPassword()));
+        checkSameUser(userGet1, user1);
 
         User userGet2 = dao.get(user2.getId());
-        assertThat(userGet2.getName(), is(user2.getName()));
-        assertThat(userGet2.getPassword(), is(user2.getPassword()));
+        checkSameUser(userGet2, user2);
     }
 
     // getCount() 테스트
     @Test
     public void count() throws SQLException, ClassNotFoundException {
-        dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
         dao.add(user1);
@@ -88,7 +86,6 @@ public class UserDaoTest {
     // 예외
     @Test
     public void getUserFailure() throws SQLException {
-        dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
         assertThrows(EmptyResultDataAccessException.class, () -> {
@@ -99,8 +96,6 @@ public class UserDaoTest {
 
     @Test
     public void getAll() throws SQLException, ClassNotFoundException {
-        dao.deleteAll();
-
         dao.add(user1);
         List<User> users1 = dao.getAll();
         assertThat(users1.size(), is(1));
@@ -122,8 +117,6 @@ public class UserDaoTest {
 
     @Test
     public void duplicateKey() throws DuplicateKeyException {
-        dao.deleteAll();
-
         assertThrows(DuplicateKeyException.class, () -> {
             dao.add(user1);
             dao.add(user1);
@@ -132,8 +125,6 @@ public class UserDaoTest {
 
     @Test
     public void sqlExceptionTranslate() {
-        dao.deleteAll();
-
         try {
             dao.add(user1);
             dao.add(user1);
@@ -149,5 +140,8 @@ public class UserDaoTest {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user1.getName(), is(user2.getName()));
         assertThat(user1.getPassword(), is(user2.getPassword()));
+        assertThat(user1.getLevel(), is(user2.getLevel()));
+        assertThat(user1.getLogin(), is(user2.getLogin()));
+        assertThat(user1.getRecommend(), is(user2.getRecommend()));
     }
 }

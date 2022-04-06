@@ -634,7 +634,7 @@ public class UserDao {
 
 ## 4장 예외
 
-<details open>
+<details>
 <summary id="exception">
 <strong>
 예외
@@ -825,7 +825,17 @@ try {
 - SQLException의 에러코드는 DB에 종속되기 때문에 각 DB에 맞는 독립적인 예외로 전환할 필요가 있다.
 - 스프링은 DataAccessException을 통해 DB에 독립적으로 적용 가능한 추상화된 런타임 예외 계층을 제공한다.
 - DAO를 데이터 액세스 기술에서 독립시키려면 인터페이스 도입과 런타임 예외 전환, 기술에 독립적인 추상화된 예외로의 전환이 필요하다.
+</details>
 
-<br>
+## 5장 서비스 추상화
 
-</detail>
+<details open>
+<summary id="abstract">
+<strong>
+서비스 추상화
+</strong>
+</summary>
+
+<h4>초난감 예외처리</h4>
+
+</details>
