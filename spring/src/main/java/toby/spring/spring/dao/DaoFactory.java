@@ -3,6 +3,7 @@ package toby.spring.spring.dao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import toby.spring.spring.service.UserService;
 
 import javax.sql.DataSource;
 
@@ -25,5 +26,12 @@ public class DaoFactory {
         UserDaoJdbc userDaoJdbc = new UserDaoJdbc();
         userDaoJdbc.setDataSource(dataSource());
         return userDaoJdbc;
+    }
+
+    @Bean
+    public UserService userService() {
+        UserService userService = new UserService();
+        userService.setUserDao(userDao());
+        return userService;
     }
 }

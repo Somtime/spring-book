@@ -38,13 +38,18 @@ public class UserDaoJdbc implements UserDao {
         );
     }
 
-    @Bean
     public void deleteAll() {
         this.jdbcTemplate.update("DELETE FROM users");
     }
 
     public int getCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
+    }
+
+    @Override
+    public void update(User user) {
+        this.jdbcTemplate.update("UPDATE users SET name = ?, password = ?, level = ?, login = ?, recommend = ? WHERE id = ?",
+                user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId());
     }
 
     private RowMapper<User> userMapper = new RowMapper<User>() {

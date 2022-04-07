@@ -1,9 +1,12 @@
 package toby.spring.spring.model;
 
+import java.util.Date;
+
 public class User {
     private String id;
     private String name;
     private String password;
+    private Date lastUpgraded;
 
     Level level;
     int login;
@@ -73,6 +76,17 @@ public class User {
 
     public void setRecommend(int recommend) {
         this.recommend = recommend;
+    }
+
+    public void upgradeLevel() {
+        Level nextLevel = this.level.nextLevel();
+
+        if (nextLevel == null) {
+            throw new IllegalArgumentException(this.level + "은 업그레이드가  불가능합니다.");
+        } else {
+            this.level = nextLevel;
+            this.lastUpgraded = new Date();
+        }
     }
 }
 

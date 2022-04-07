@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DaoFactory.class) // Configuration Class 지정 인듯?
-/*@ContextConfiguration("applicationContext.xml") // Configuration Xml*/
+/*@ContextConfiguration(locations="applicationContext.xml") // Configuration Xml*/
 /*@DirtiesContext // 애플리케이션 컨텍스트의 구성이나 상태 변경 을 직접 한다고 선언!*/
 public class UserDaoTest {
     private User user1;
@@ -134,6 +134,26 @@ public class UserDaoTest {
 
             assertThat(set.translate(null, null, sqlEx), instanceOf(DuplicateKeyException.class));
         }
+    }
+
+    @Test
+    public void update() {
+        dao.add(user1);
+        dao.add(user2);
+
+        user1.setName("유건희");
+        user1.setPassword("password");
+        user1.setLevel(Level.GOLD);
+        user1.setLogin(1000);
+        user1.setRecommend(999);
+
+        dao.update(user1);
+
+        User user1update = dao.get(user1.getId());
+        checkSameUser(user1, user1update);
+
+        User user2update = dao.get(user2.getId());
+        checkSameUser(user2, user2update);
     }
 
     private void checkSameUser(User user1, User user2) {
