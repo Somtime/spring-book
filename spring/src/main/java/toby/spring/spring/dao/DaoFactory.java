@@ -2,7 +2,11 @@ package toby.spring.spring.dao;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.jta.JtaTransactionManager;
 import toby.spring.spring.service.UserService;
 
 import javax.sql.DataSource;
@@ -33,5 +37,13 @@ public class DaoFactory {
         UserService userService = new UserService();
         userService.setUserDao(userDao());
         return userService;
+    }
+
+    @Bean
+    public TransactionManager transactionManager() {
+        PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource());
+        /*PlatformTransactionManager transactionManager = new JtaTransactionManager(); // JTA 이용시*/
+
+        return transactionManager;
     }
 }

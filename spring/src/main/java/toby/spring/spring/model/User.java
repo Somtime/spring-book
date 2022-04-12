@@ -6,6 +6,7 @@ public class User {
     private String id;
     private String name;
     private String password;
+    private String email;
     private Date lastUpgraded;
 
     Level level;
@@ -76,6 +77,14 @@ public class User {
 
     public void setRecommend(int recommend) {
         this.recommend = recommend;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void upgradeLevel() {

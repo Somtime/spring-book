@@ -338,7 +338,7 @@ public int getCount() throws SQLException {
 
 <br>
 
-<h4>전략 패턴</h4>
+<h3>전략 패턴</h3>
 
 > 개방 폐쇄 원칙(OCP)을 잘 지키는 구조이면서도 템플릿 메소드 패턴보다 유연하고 확장성이 뛰어난 것이 오브젝트를 둘로 분리하고 클래스 레벨에서는 인터페이스를 통해서만 의존하도록 만드는 전략 패턴
 
@@ -623,7 +623,7 @@ public class UserDao {
 
 <br>
 
-<b>정리</b>
+<h3>정리</h3>
 
 - JDBC와 같이 예외 발생 가능성이 있고, 공유 리소스의 반환이 필요한 코드는 반드시 try/catch/finally 블록으로 관리해야 한다.
 - 일정한 작업 흐름이 반복되면서 그중 일부 기능만 바뀌는 코드가 존재한다면 전략 패턴을 적용한다. 바뀌지 않는 부분은 컨텍스트로, 바뀌는 부분을 전략으로 만들고 인터페이스를 통해 유연하게 전략을 변경할 수 있도록 구성한다.
@@ -641,7 +641,7 @@ public class UserDao {
 </strong>
 </summary>
 
-<h4>초난감 예외처리</h4>
+<h3>초난감 예외처리</h3>
 
 <b>예외 블랙홀</b>
 
@@ -758,7 +758,7 @@ try {
 
 <br>
 
-<h4>예외 전환</h4>
+<h3>예외 전환</h3>
 
 > 예외 회피와 같이 예외를 복구해서 정상적인 상태로는 만들 수 없을 때 밖으로 예외를 던지는 것이다. 하지만 발생한 예외를 적절한 예외로 전환해서 던지는 방식이다.
 
@@ -796,7 +796,7 @@ try {
 
 <br>
 
-<h4>기술에 독립적인 UserDao</h4>
+<h3>기술에 독립적인 UserDao</h3>
 
 - DAO 인터페이스
   : DAO를 데이터 액세스 로직을 담은 코드의 성격이 다른 코드에서 분리하는 방식을 사용하면 전략 패턴과 같은 방법을 적용해 구현 방법을 변경해서 사용할 수 있다. DAO를 사용하는 쪽에서는 DAO가 내부에서 어떤 데이터 액세스 기술을 사용하는지 신경 쓰지 않을 수 있다.
@@ -816,7 +816,7 @@ try {
 
 <br>
 
-<h4>정리</h4>
+<h3>정리</h3>
 
 - 예외를 잡아서 아무런 조취를 취하지 않거나 의미 없는 throws 선언을 습관처럼 사용하는 것은 위험하다.
 - 예외는 복구하거나, 예외 처리 오브젝트로 의도적으로 전달하거나, 적절한 예외로 전환하여 던져줘야 한다.
@@ -836,7 +836,7 @@ try {
 </strong>
 </summary>
 
-<h4>트랜잭션</h4>
+<h3>트랜잭션</h3>
 
 > DB는 그 자체로 트랜잭션을 지원한다. SQL을 통해 다중 로우의 수정이나 삭제 요청을 했을 때, 일부 로우만 삭제되는 경우는 없다. 하나의 SQL 명령을 처리하는 경우는 DB가 트랜잭션을 보장해준다고 믿을 수 있다. 
 
@@ -939,10 +939,63 @@ try {
 
 <br>
 
-<h4>트랜잭션 추상화</h4>
+<h3>트랜잭션 추상화</h3>
 
 > 스프링이 제공하는 트랜잭션 추상화 API를 사용하면 비즈니스 로직의 수정이 아닌 DB 정보를 수정하는 작업에서 Service 의 코드를 수정하지 않아도 된다.
 
 ![스프링의 트랜잭션 추상화 계층](img/trasaction_abstraction.jpg)
 
+<br>
+
+<b>트랜잭션 분리</b>
+
+```
+private PlatformTransactionManager transactionManager;
+
+public void setTransactionManager(PlatformTransactionManager transactionManager) {
+  this.transactionManager = transactionManager;
+}
+
+public void upgradeLevels() throws Exception {
+  TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+  try {
+    List<User> users = userDao.getAll();
+
+    for (User user : users) {
+      if (canUpgradeLevel(user)) {
+        upgradeLevel(user);
+      }
+    }
+    this.transactionManager.commit(status);
+  } catch (Exception e) {
+    this.transactionManager.rollback(status);
+    throw e;
+  } finally {
+  }
+}
+```
+
+```
+@Bean
+public TransactionManager transactionManager() {
+  PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource());
+  /*PlatformTransactionManager transactionManager = new JtaTransactionManager(); // JTA 이용시*/
+
+  return transactionManager;
+}
+```
+
+<br>
+
+<h3>정리</h3>
+
+- 비즈니스 로직을 담은 코드는 데이터 액세스 로직을 담은 코드와 깔끔하게 분리되는 것이 바람직하다. 비즈니스 로직 코드 또한 내부적으로 책임과 역할에 따라서 깔끔하게 메소드로 정리돼야 한다.
+- 이를 위해서는 DAO의 기술 변화에 서비스 계층의 코드가 영향을 받지 않
+-도록 인터페이스와 DI를 잘 활용해서 결합도를 낮춰줘야 한다.
+- DAO를 사용하는 비즈니스 로직에는 단위 작업을 보장해주는 트랜잭션이 필요하다.
+- 트랜잭션의 시작과 종료를 지정하는 일을 트랜잭션 경계설정이라고 한다. 트랜잭션 경계설정을 주로 비즈니스 로직(Service) 안에서 일어나는 경우가 많다.
+- 시작된 트랜잭션 정보를 담은 오브젝트를 파라미터로 DAO에 전달하는 방법은 매우 비효율적이기 때문에 스프링이 제공하는 트랜잭션 동기화 기법을 활용하는 것이 편리하다.
+- 트랜잭션 경계설정 코드가 비즈니스 로직 코드에 영향을 주지 않게 하려면 스프링이 제공하는 트랜잭션 서비스 추상화를 이용하면 된다. (스프링의 트랜잭션 추상화 계층 이미지 참고)
 </details>
+

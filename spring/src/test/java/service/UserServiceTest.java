@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import toby.spring.spring.dao.DaoFactory;
 import toby.spring.spring.dao.UserDao;
 import toby.spring.spring.model.Level;
@@ -32,7 +33,8 @@ import static org.hamcrest.Matchers.notNullValue;
 public class UserServiceTest {
     @Autowired UserService userService;
     @Autowired UserDao userDao;
-    @Autowired DataSource dataSource;
+    @Autowired
+    PlatformTransactionManager transactionManager;
     List<User> users;
 
     @BeforeEach
@@ -52,7 +54,7 @@ public class UserServiceTest {
     public void upgradeLevels() throws Exception {
         for (User user : users) userDao.add(user);
 
-        userService.setDataSource(this.dataSource);
+        userService.setTransactionManager(transactionManager);
         userService.upgradeLevels();
 
         checkLevelUpgraded(users.get(0), false);
@@ -82,7 +84,8 @@ public class UserServiceTest {
     public void upgradeAllOrNothing() throws Exception {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
-        testUserService.setDataSource(this.dataSource);
+        /*testUserService.setDataSource(this.dataSource);*/
+        testUserService.setTransactionManager(transactionManager);
 
         for (User user : users) userDao.add(user);
 
@@ -98,7 +101,7 @@ public class UserServiceTest {
     static class TestUserService extends UserService {
         private String id;
 
-        private TestUserService(String id) {
+        public TestUserService(String id) {
             this.id = id;
         }
 

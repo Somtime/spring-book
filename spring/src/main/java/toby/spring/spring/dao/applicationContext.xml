@@ -6,7 +6,7 @@
 
     <bean id="userService" class="toby.spring.spring.service.UserService">
         <property name="userDao" ref="userDao" />
-        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
     </bean>
 
     <bean id="userDao" class="toby.spring.spring.dao.UserDaoJdbc">
@@ -22,5 +22,9 @@
         <property name="url" value="jdbc:mysql://172.19.234.119/toby_spring"></property>
         <property name="username" value="root"></property>
         <property name="password" value="password"></property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
     </bean>
 </beans>
