@@ -830,12 +830,51 @@ try {
 ## 5장 서비스 추상화
 
 <details open>
-<summary id="abstract">
+<summary id="abstraction">
 <strong>
 서비스 추상화
 </strong>
 </summary>
 
-<h4>초난감 예외처리</h4>
+<h4>트랜잭션</h4>
 
+> DB는 그 자체로 트랜잭션을 지원한다. SQL을 통해 다중 로우의 수정이나 삭제 요청을 했을 때, 일부 로우만 삭제되는 경우는 없다. 하나의 SQL 명령을 처리하는 경우는 DB가 트랜잭션을 보장해준다고 믿을 수 있다. 
+
+> 하지만, 여러 개의 SQL이 사용되는 작업을 하나의 트랜잭션으로 취급해야 하는 경우가 있다. 예를 들면 계좌이체가 있다. 계좌이체 작업은 반드시 하나의 트랜잭션으로 묶여서 일어나야 한다. 이체를 할 때, 출금계좌의 잔고는 줄어들고 입금계좌의 잔고는 증가해야 한다. 이 때 이체 프로그램은 DB에 두 번 요청을 보낸다. 적어도 DB 출금계좌, 입금계좌의 잔고를 수정하는 두 개의 SQL이 필요하다.
+
+<br>
+
+- 트랜잭션 롤백 (transaction rollback)
+
+: 첫 번째 SQL을 성공적으로 실행했지만 두 번째 SQL이 성공하기 전에 장애가 생겨서 작업이 중단되는 경우
+
+- 트랜잭션 커밋 (transaction commit)
+
+: 여러 개의 SQL이 하나의 트랜잭션으로 묶여러 처리될 때, 모든 SQL 실행이 오류 없이 실행됐을 경우 DB에 알려줘서 작업을 확정시키는 경우
+
+<br>
+
+<b>JDBC 트랜잭션</b>
+
+```
+Connection c = dataSource.getConnection();
+
+c.setAutoCommit(false);
+try {
+  PreparedStatement st1 = c.prepareStatement("update users ...");
+  st1.executeUpdate();
+
+  PreparedStatement st2 = c.prepareStatement("delete users ...");
+  st2.executeUpdate();
+
+  c.commit();
+} catch (Exception e) {
+  c.rollback();
+}
+c.close();
+```
+
+<br>
+
+그림 5-2 넣기
 </details>
