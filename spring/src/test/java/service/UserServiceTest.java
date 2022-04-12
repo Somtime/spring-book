@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.notNullValue;
 public class UserServiceTest {
     @Autowired UserService userService;
     @Autowired UserDao userDao;
+    @Autowired DataSource dataSource;
     List<User> users;
 
     @BeforeEach
@@ -48,9 +49,10 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeLevels() {
+    public void upgradeLevels() throws Exception {
         for (User user : users) userDao.add(user);
 
+        userService.setDataSource(this.dataSource);
         userService.upgradeLevels();
 
         checkLevelUpgraded(users.get(0), false);
@@ -77,9 +79,10 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeAllOrNothing() {
+    public void upgradeAllOrNothing() throws Exception {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
+        testUserService.setDataSource(this.dataSource);
 
         for (User user : users) userDao.add(user);
 

@@ -876,5 +876,73 @@ c.close();
 
 <br>
 
-그림 5-2 넣기
+![트랜잭션 경계설정 구조](img/service_method_transaction_structure.jpg)
+DAO에서 비즈니스 로직을 처리하지 않고, 지금 나눠둔 (Service-DAO) 구조를 가지고 가려면 Service 내의 함수가 다음과 같은 구조를 가지고 있어야 한다.  
+
+<br>
+
+![Transaction 을 위한 Connection 파라미터 추가](img/connection_parameter_for_transaction.jpg)
+트랜잭션을 설정해주기 위해 DAO의 메소드들은 Connection 을 파라미터로 받아서 사용하는 코드를 사용할 수 있다. 하지만 이 작업은 매번 Connection을 받아서 사용해야 한다.
+
+<b>트랜잭션 동기화</b>
+: JdbcTemplate는 트랜잭션 동기화 기능을 지원하는 유틸리티 메소드를 제공한다. 이를 사용하면 DAO 메소드의 파라미터를 그대로 둔채로 사용할 수 있다. 또한 별도의 설정 없이 외부에서 트랜잭션 설정을 해주면 DAO의 내부에서는 외부에서 선언해준 Connection을 받아서 사용하게 된다.
+
+```
+public void upgradeLevels() throws Exception {
+  TransactionSynchronizationManager.initSynchronization();
+  Connection c = DataSourceUtils.getConnection(dataSource);
+  c.setAutoCommit(false);
+
+  try {
+    List<User> users = userDao.getAll();
+
+    for (User user : users) {
+      if (canUpgradeLevel(user)) {
+        upgradeLevel(user);
+      }
+    }
+    c.commit();
+  } catch (Exception e) {
+    c.rollback();
+    throw e;
+  } finally {
+    DataSourceUtils.releaseConnection(c, dataSource);   // DB Connection Close
+    // 동기화 종료 및 정리
+    TransactionSynchronizationManager.unbindResource(this.dataSource);
+    TransactionSynchronizationManager.clearSynchronization();
+  }
+}
+```
+
+<br>
+
+<b>JTA (Java Transaction API)</b>
+
+![JTA를 통한 글로벌/분산 트랜잭션 관리](img/transaction_jta.jpg)
+
+```
+InitialContext ctx = new InitialContext();
+UserTransaction tx = (UserTransaction) ctx.lookup(USER_TX_JNDI_NAME);
+tx.begin();
+Connection c = dataSource.getConnection();
+
+try {
+  // 데이터 엑세스 코드
+  tx.commit();
+} catch (Exception e) {
+  tx.rollback();
+  throw e;
+} finally {
+  c.close();
+}
+```
+
+<br>
+
+<h4>트랜잭션 추상화</h4>
+
+> 스프링이 제공하는 트랜잭션 추상화 API를 사용하면 비즈니스 로직의 수정이 아닌 DB 정보를 수정하는 작업에서 Service 의 코드를 수정하지 않아도 된다.
+
+![스프링의 트랜잭션 추상화 계층](img/trasaction_abstraction.jpg)
+
 </details>
