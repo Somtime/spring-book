@@ -4,22 +4,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import toby.spring.spring.dao.DaoFactory;
 import toby.spring.spring.dao.UserDao;
 import toby.spring.spring.model.Level;
 import toby.spring.spring.model.User;
 import toby.spring.spring.service.UserService;
+import toby.spring.spring.service.UserServiceImpl;
+import toby.spring.spring.service.UserServiceTx;
 
 import static org.assertj.core.api.Assertions.fail;
-import static toby.spring.spring.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static toby.spring.spring.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+import static toby.spring.spring.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static toby.spring.spring.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
-import javax.sql.DataSource;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,10 +32,11 @@ import static org.hamcrest.Matchers.notNullValue;
 @ContextConfiguration(classes = DaoFactory.class)
 /*@ContextConfiguration(locations = "/toby/spring/spring/dao/applicationContext.xml")*/
 public class UserServiceTest {
-    @Autowired UserService userService;
     @Autowired UserDao userDao;
     @Autowired
-    PlatformTransactionManager transactionManager;
+    TransactionManager transactionManager;
+    @Autowired UserService userService;
+    @Autowired UserServiceImpl userServiceImpl;
     List<User> users;
 
     @BeforeEach
@@ -43,7 +45,7 @@ public class UserServiceTest {
 
         users = Arrays.asList(
                 new User("bumjin", "박범진", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0),
-                new User("joytouce", "강명성", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+                new User("joytouch", "강명성", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
                 new User("erwins", "신승한", "p3", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1),
                 new User("madnite1", "이상호", "p4", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
                 new User("green", "오민규", "p5", Level.GOLD, 100, Integer.MAX_VALUE)
@@ -51,17 +53,23 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeLevels() throws Exception {
-        for (User user : users) userDao.add(user);
+    public void upgradeLevels() {
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
 
-        userService.setTransactionManager(transactionManager);
-        userService.upgradeLevels();
+        MockUserDao mockUserDao = new MockUserDao(this.users);
+        userServiceImpl.setUserDao(mockUserDao);
 
-        checkLevelUpgraded(users.get(0), false);
-        checkLevelUpgraded(users.get(1), true);
-        checkLevelUpgraded(users.get(2), false);
-        checkLevelUpgraded(users.get(3), true);
-        checkLevelUpgraded(users.get(4), false);
+        userServiceImpl.upgradeLevels();
+
+        List<User> updated = mockUserDao.getUpdated();
+        assertThat(updated.size(), is(2));
+        checkUserAndLevel(updated.get(0), "joytouch", Level.SILVER);
+        checkUserAndLevel(updated.get(1), "madnite1", Level.GOLD);
+    }
+
+    private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
+        assertThat(updated.getId(), is(expectedId));
+        assertThat(updated.getLevel(), is(expectedLevel));
     }
 
     @Test
@@ -70,8 +78,8 @@ public class UserServiceTest {
         User userWithoutLevel = users.get(0);
         userWithoutLevel.setLevel(null);
 
-        userService.add(userWithLevel);
-        userService.add(userWithoutLevel);
+        userServiceImpl.add(userWithLevel);
+        userServiceImpl.add(userWithoutLevel);
 
         User userWithLevelRead = userDao.get(userWithLevel.getId());
         User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
@@ -82,10 +90,13 @@ public class UserServiceTest {
 
     @Test
     public void upgradeAllOrNothing() throws Exception {
-        UserService testUserService = new TestUserService(users.get(3).getId());
+        TestUserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         /*testUserService.setDataSource(this.dataSource);*/
-        testUserService.setTransactionManager(transactionManager);
+
+        UserServiceTx txUserService = new UserServiceTx();
+        txUserService.setTransactionManager((PlatformTransactionManager) transactionManager);
+        txUserService.setUserService(testUserService);
 
         for (User user : users) userDao.add(user);
 
@@ -98,7 +109,7 @@ public class UserServiceTest {
         checkLevelUpgraded(users.get(1), false);
     }
 
-    static class TestUserService extends UserService {
+    static class TestUserService extends UserServiceImpl {
         private String id;
 
         public TestUserService(String id) {
@@ -122,6 +133,47 @@ public class UserServiceTest {
             assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
         } else {
             assertThat(userUpdate.getLevel(), is(user.getLevel()));
+        }
+    }
+
+    static class MockUserDao implements UserDao {
+        private List<User> users;
+        private List<User> updated = new ArrayList<>();
+
+        private MockUserDao(List<User> users) {
+            this.users = users;
+        }
+
+        public List<User> getUpdated() {
+            return this.updated;
+        }
+
+        public List<User> getAll() {
+            return this.users;
+        }
+
+        public void update(User user) {
+            updated.add(user);
+        }
+
+        @Override
+        public void add(User user) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public User get(String id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void deleteAll() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getCount() {
+            throw new UnsupportedOperationException();
         }
     }
 }

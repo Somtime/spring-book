@@ -6,8 +6,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
-import org.springframework.transaction.jta.JtaTransactionManager;
+import toby.spring.spring.model.User;
 import toby.spring.spring.service.UserService;
+import toby.spring.spring.service.UserServiceImpl;
+import toby.spring.spring.service.UserServiceTx;
 
 import javax.sql.DataSource;
 
@@ -18,7 +20,7 @@ public class DaoFactory {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("jdbc:mysql://172.24.188.66/toby_spring");
+        dataSource.setUrl("jdbc:mysql://localhost/toby_spring");
         dataSource.setUsername("springbook");
         dataSource.setPassword("password");
 
@@ -33,10 +35,18 @@ public class DaoFactory {
     }
 
     @Bean
-    public UserService userService() {
-        UserService userService = new UserService();
-        userService.setUserDao(userDao());
-        return userService;
+    public UserServiceImpl userServiceImpl() {
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
+        userServiceImpl.setUserDao(userDao());
+        return userServiceImpl;
+    }
+
+    @Bean
+    public UserServiceTx userService() {
+        UserServiceTx userServiceTx = new UserServiceTx();
+        userServiceTx.setUserService(userServiceImpl());
+        userServiceTx.setTransactionManager((PlatformTransactionManager) transactionManager());
+        return userServiceTx;
     }
 
     @Bean
