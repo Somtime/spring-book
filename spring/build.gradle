@@ -29,7 +29,6 @@ dependencies {
 	implementation group: 'cglib', name: 'cglib', version: '3.3.0'
 	implementation 'javax.servlet:servlet-api:2.5'
 
-
 }
 
 tasks.named('test') {

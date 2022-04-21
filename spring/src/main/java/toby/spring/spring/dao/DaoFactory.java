@@ -10,8 +10,12 @@ import toby.spring.spring.model.User;
 import toby.spring.spring.service.UserService;
 import toby.spring.spring.service.UserServiceImpl;
 import toby.spring.spring.service.UserServiceTx;
+import toby.spring.spring.service.sqlservice.SimpleSqlService;
+import toby.spring.spring.service.sqlservice.SqlService;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class DaoFactory {
@@ -20,7 +24,7 @@ public class DaoFactory {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("jdbc:mysql://localhost/toby_spring");
+        dataSource.setUrl("jdbc:mysql://172.26.1.184/toby_spring");
         dataSource.setUsername("springbook");
         dataSource.setPassword("password");
 
@@ -31,6 +35,7 @@ public class DaoFactory {
     public UserDaoJdbc userDao() {
         UserDaoJdbc userDaoJdbc = new UserDaoJdbc();
         userDaoJdbc.setDataSource(dataSource());
+        userDaoJdbc.setSqlService(sqlService());
         return userDaoJdbc;
     }
 
@@ -55,5 +60,26 @@ public class DaoFactory {
         /*PlatformTransactionManager transactionManager = new JtaTransactionManager(); // JTA 이용시*/
 
         return transactionManager;
+    }
+
+    @Bean
+    public SimpleSqlService sqlService() {
+        SimpleSqlService sqlService = new SimpleSqlService();
+        sqlService.setSqlMap(sqlMap());
+        return sqlService;
+    }
+
+    @Bean
+    public Map<String, String> sqlMap() {
+        Map<String, String> sqlMap = new HashMap<>();
+
+        sqlMap.put("userAdd", "INSERT INTO users(id, name, password, level, login, recommend) VALUES(?, ?, ?, ?, ?, ?)");
+        sqlMap.put("userGet", "SELECT * FROM users WHERE id = ?");
+        sqlMap.put("userGetAll", "SELECT * FROM users");
+        sqlMap.put("userDeleteAll", "DELETE FROM users");
+        sqlMap.put("userGetCount", "SELECT COUNT(*) FROM users");
+        sqlMap.put("userUpdate", "UPDATE users SET name = ?, password = ?, level = ?, login = ?, recommend = ? WHERE id = ?");
+
+        return sqlMap;
     }
 }

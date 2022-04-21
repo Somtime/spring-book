@@ -1,6 +1,7 @@
 package toby.spring.spring;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.test.context.ContextConfiguration;
 import toby.spring.spring.dao.UserDaoJdbc;
 import toby.spring.spring.model.User;
 

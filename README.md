@@ -1000,7 +1000,7 @@ public TransactionManager transactionManager() {
 
 ## 6장 AOP
 
-<details open>
+<details>
 <summary id="aop">
 <strong>
 AOP
@@ -1021,5 +1021,16 @@ UserService는 UserDao, TransactionManager, MailSender라는 세 가지 의존�
 ![테스트 대상의 의존구조](img/before_test_structure.jpg)
 
 ![고립시킨 UserServiceImpl에 대한 테스트 구조](img/after_test_structure.jpg)
+
+</details>
+
+## 7장 스프링 핵심 기술의 응용
+
+<details open>
+<summary id="spring-application">
+<strong>
+스프링 핵심 기술의 응용
+</strong>
+</summary>
 
 </details>
