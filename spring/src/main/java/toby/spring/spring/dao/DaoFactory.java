@@ -10,8 +10,7 @@ import toby.spring.spring.model.User;
 import toby.spring.spring.service.UserService;
 import toby.spring.spring.service.UserServiceImpl;
 import toby.spring.spring.service.UserServiceTx;
-import toby.spring.spring.service.sqlservice.SimpleSqlService;
-import toby.spring.spring.service.sqlservice.SqlService;
+import toby.spring.spring.service.sqlservice.*;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ public class DaoFactory {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
         dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
-        dataSource.setUrl("jdbc:mysql://172.26.1.184/toby_spring");
+        dataSource.setUrl("jdbc:mysql://172.21.22.31/toby_spring");
         dataSource.setUsername("springbook");
         dataSource.setPassword("password");
 
@@ -63,10 +62,23 @@ public class DaoFactory {
     }
 
     @Bean
-    public SimpleSqlService sqlService() {
-        SimpleSqlService sqlService = new SimpleSqlService();
-        sqlService.setSqlMap(sqlMap());
+    public BaseSqlService sqlService() {
+        BaseSqlService sqlService = new BaseSqlService();
+        sqlService.setSqlReader(sqlReader());
+        sqlService.setSqlRegistry(sqlRegistry());
         return sqlService;
+    }
+
+    @Bean
+    public FactorySqlReader sqlReader() {
+        FactorySqlReader sqlReader = new FactorySqlReader();
+        sqlReader.setSqlMap(sqlMap());
+        return sqlReader;
+    }
+
+    @Bean
+    public HashMapSqlRegistry sqlRegistry() {
+        return new HashMapSqlRegistry();
     }
 
     @Bean
@@ -82,4 +94,6 @@ public class DaoFactory {
 
         return sqlMap;
     }
+
+
 }
